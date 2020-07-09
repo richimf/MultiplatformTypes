@@ -19,26 +19,30 @@ public typealias MP_HSV = (h: Double, s: Double, v: Double)
 
 public extension MPColor {
     var red: Double {
-        Double(CIColor(color: self).red)
+        Double(CIColor(color: self)?.red ?? 0.0)
     }
     var green: Double {
-        Double(CIColor(color: self).green)
+        Double(CIColor(color: self)?.green ?? 0.0)
     }
     var blue: Double {
-        Double(CIColor(color: self).blue)
+        Double(CIColor(color: self)?.blue ?? 0.0)
     }
     var alpha: Double {
-        Double(CIColor(color: self).alpha)
+        Double(CIColor(color: self)?.alpha ?? 0.0)
     }
     var opacity: Double { alpha }
     var rgb: MP_RGB {
-        let ciColor: CIColor = CIColor(color: self)
+        guard let ciColor: CIColor = CIColor(color: self) else {
+            return (r: 0.0, g: 0.0, b: 0.0)
+        }
         return (r: Double(ciColor.red),
                 g: Double(ciColor.green),
                 b: Double(ciColor.blue))
     }
     var rgba: MP_RGBA {
-        let ciColor: CIColor = CIColor(color: self)
+        guard let ciColor: CIColor = CIColor(color: self) else {
+            return (r: 0.0, g: 0.0, b: 0.0, a: 0.0)
+        }
         return (r: Double(ciColor.red),
                 g: Double(ciColor.green),
                 b: Double(ciColor.blue),
