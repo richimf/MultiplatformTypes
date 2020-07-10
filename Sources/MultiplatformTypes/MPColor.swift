@@ -94,6 +94,11 @@ public extension MPColor {
 
 public extension MPColor {
 
+    var hue: Double { hsv.h }
+    var saturation: Double { hsv.s }
+    var value: Double { hsv.v }
+    var brightness: Double { value }
+
     var hsv: MP_HSV {
         let rgb: MP_RGB = self.rgb
         return MPColor.hsv(r: rgb.r, g: rgb.g, b: rgb.b)
@@ -238,4 +243,13 @@ extension String {
         return String(self[start..<end])
     }
     
+}
+
+// MARK: - ID
+
+extension MPColor: Identifiable {
+    public var id: [Double] {
+        let rgba: MP_RGBA = self.rgba
+        return [rgba.r, rgba.g, rgba.b, rgba.a]
+    }
 }
