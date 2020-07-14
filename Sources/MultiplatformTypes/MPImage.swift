@@ -34,3 +34,21 @@ public extension Image {
         #endif
     }
 }
+
+@available(iOS 13, *)
+@available(OSX 10.16, *)
+public extension MPImage {
+    #if os(macOS)
+    static let `nil`: MPImage = MPImage(systemSymbolName: "camera.metering.none", accessibilityDescription: nil)!
+    #else
+    static let `nil`: MPImage = MPImage(systemName: "camera.metering.none")!
+    #endif
+}
+
+@available(iOS 13, *)
+@available(OSX 10.16, *)
+public extension Optional where Wrapped == MPImage {
+    var forceBond: Binding<MPImage> {
+        Binding<MPImage>(get: { self ?? .nil }, set: { _ in })
+    }
+}
