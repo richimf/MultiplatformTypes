@@ -1,10 +1,8 @@
 import SwiftUI
 
 #if os(macOS)
-public typealias MPViewController = NSViewController
 public typealias MPViewControllerRepresentable = NSViewControllerRepresentable
 #else
-public typealias MPViewController = UIViewController
 public typealias MPViewControllerRepresentable = UIViewControllerRepresentable
 #endif
 

@@ -1,10 +1,8 @@
 import SwiftUI
 
 #if os(macOS)
-public typealias MPView = NSView
 public typealias MPViewRepresentable = NSViewRepresentable
 #else
-public typealias MPView = UIView
 public typealias MPViewRepresentable = UIViewRepresentable
 #endif
 
