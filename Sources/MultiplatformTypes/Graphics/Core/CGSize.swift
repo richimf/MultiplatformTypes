@@ -4,6 +4,17 @@ public extension CGSize {
     static let one = CGSize(width: 1.0, height: 1.0)
 }
 
+//extension CGSize: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
+//    public init(integerLiteral value: Int) {
+//        let floatValue = CGFloat(value)
+//        self.init(width: floatValue, height: floatValue)
+//    }
+//    public init(floatLiteral value: Double) {
+//        let floatValue = CGFloat(value)
+//        self.init(width: floatValue, height: floatValue)
+//    }
+//}
+
 public extension CGSize {
     
     static func + (lhs: CGSize, rhs: CGFloat) -> CGSize {
