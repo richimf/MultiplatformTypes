@@ -15,6 +15,39 @@ public typealias MP_RGB = (r: Double, g: Double, b: Double)
 public typealias MP_RGBA = (r: Double, g: Double, b: Double, a: Double)
 public typealias MP_HSV = (h: Double, s: Double, v: Double)
 
+// MARK: - Dark Mode Colors
+
+public extension MPColor {
+    static let primary: MPColor = {
+        #if os(macOS)
+        return .labelColor
+        #else
+        return .label
+        #endif
+    }()
+    static let secondary: MPColor = {
+        #if os(macOS)
+        return .secondaryLabelColor
+        #else
+        return .secondaryLabel
+        #endif
+    }()
+    static let tertiary: MPColor = {
+        #if os(macOS)
+        return .tertiaryLabelColor
+        #else
+        return .tertiaryLabel
+        #endif
+    }()
+    static let quaternary: MPColor = {
+        #if os(macOS)
+        return .quaternaryLabelColor
+        #else
+        return .quaternaryLabel
+        #endif
+    }()
+}
+
 // MARK: - Channels
 
 public extension MPColor {
