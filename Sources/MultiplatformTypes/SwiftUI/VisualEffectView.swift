@@ -7,11 +7,24 @@ public typealias MPVisualEffectView = UIVisualEffectView
 #endif
 
 public extension View {
-    func backgroundBlur() -> some View {
-        background(VisualEffectView())
+    /// `backgroundBlur` is a convenience method for adding a `VisualEffectView` background.
+    ///
+    /// `fallbackColor` is used on **macOS**
+    /// use `.desktopBackgroundBlur()` to get a native **macOS** desktop blur
+    func backgroundBlur(cornerRadius: CGFloat = 0.0, fallbackColor: Color = .clear) -> some View {
+        #if os(macOS)
+        return background(fallbackColor)
+        #else
+        return background(VisualEffectView().mask(RoundedRectangle(cornerRadius: cornerRadius)))
+        #endif
     }
-    func backgroundBlur(cornerRadius: CGFloat) -> some View {
-        background(VisualEffectView().mask(RoundedRectangle(cornerRadius: cornerRadius)))
+    /// Only used for **macOS** desktop blur.
+    func desktopBackgroundBlur() -> some View {
+        #if os(macOS)
+        return background(VisualEffectView())
+        #else
+        return self
+        #endif
     }
 }
 
