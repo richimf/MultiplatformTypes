@@ -113,15 +113,24 @@ public extension MPColor {
 // TODO: Add matching initalizers
 
 
-// MARK: - Operators
+// MARK: - Background Color
 
-public extension MPColor {
+#if os(macOS)
+public extension MPView {
     
-//    static func + (lhs: MPColor, rhs: MPColor) -> MPColor {
-//
-//    }
+    var backgroundColor: MPColor {
+        get {
+            guard let color: CGColor = layer?.backgroundColor else { return .clear }
+            return MPColor(cgColor: color) ?? .clear
+        }
+        set {
+            wantsLayer = true
+            layer?.backgroundColor = newValue.cgColor
+        }
+    }
     
 }
+#endif
 
 // MARK: - HSV
 
