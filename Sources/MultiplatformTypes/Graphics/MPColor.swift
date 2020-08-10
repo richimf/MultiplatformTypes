@@ -48,6 +48,12 @@ public extension MPColor {
     }()
 }
 
+// MARK: - Dark Mode Colors
+
+public extension MPColor {
+    static let clearGray: MPColor = MPColor(white: 0.5, alpha: 0.001)
+}
+
 // MARK: - Channels
 
 public extension MPColor {
