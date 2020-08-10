@@ -286,3 +286,62 @@ extension MPColor: Identifiable {
         return [rgba.r, rgba.g, rgba.b, rgba.a]
     }
 }
+
+// MARK: - Operators
+
+public extension MPColor {
+    
+    private static func combo(_ lhs: MPColor, _ rhs: MPColor, mix: (Double, Double) -> (Double)) -> MPColor {
+        let lc: MP_RGBA = lhs.rgba
+        let rc: MP_RGBA = rhs.rgba
+        let r: Double = min(max(mix(lc.r, rc.r), 0.0), 1.0)
+        let g: Double = min(max(mix(lc.g, rc.g), 0.0), 1.0)
+        let b: Double = min(max(mix(lc.b, rc.b), 0.0), 1.0)
+        let a: Double = min(max(mix(lc.a, rc.a), 0.0), 1.0)
+        return MPColor(displayP3Red: CGFloat(r),
+                       green: CGFloat(g),
+                       blue: CGFloat(b),
+                       alpha: CGFloat(a))
+    }
+    
+    static func +(lhs: MPColor, rhs: MPColor) -> MPColor {
+        MPColor.combo(lhs, rhs, mix: +)
+    }
+    static func +(lhs: MPColor, rhs: Double) -> MPColor {
+        MPColor.combo(lhs, MPColor(white: CGFloat(rhs), alpha: 1.0), mix: +)
+    }
+    static func +(lhs: Double, rhs: MPColor) -> MPColor {
+        MPColor.combo(MPColor(white: CGFloat(lhs), alpha: 1.0), rhs, mix: +)
+    }
+    
+    static func -(lhs: MPColor, rhs: MPColor) -> MPColor {
+        MPColor.combo(lhs, rhs, mix: -)
+    }
+    static func -(lhs: MPColor, rhs: Double) -> MPColor {
+        MPColor.combo(lhs, MPColor(white: CGFloat(rhs), alpha: 1.0), mix: -)
+    }
+    static func -(lhs: Double, rhs: MPColor) -> MPColor {
+        MPColor.combo(MPColor(white: CGFloat(lhs), alpha: 1.0), rhs, mix: -)
+    }
+    
+    static func *(lhs: MPColor, rhs: MPColor) -> MPColor {
+        MPColor.combo(lhs, rhs, mix: *)
+    }
+    static func *(lhs: MPColor, rhs: Double) -> MPColor {
+        MPColor.combo(lhs, MPColor(white: CGFloat(rhs), alpha: 1.0), mix: *)
+    }
+    static func *(lhs: Double, rhs: MPColor) -> MPColor {
+        MPColor.combo(MPColor(white: CGFloat(lhs), alpha: 1.0), rhs, mix: *)
+    }
+    
+    static func /(lhs: MPColor, rhs: MPColor) -> MPColor {
+        MPColor.combo(lhs, rhs, mix: /)
+    }
+    static func /(lhs: MPColor, rhs: Double) -> MPColor {
+        MPColor.combo(lhs, MPColor(white: CGFloat(rhs), alpha: 1.0), mix: /)
+    }
+    static func /(lhs: Double, rhs: MPColor) -> MPColor {
+        MPColor.combo(MPColor(white: CGFloat(lhs), alpha: 1.0), rhs, mix: /)
+    }
+    
+}
