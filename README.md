@@ -1,6 +1,24 @@
 # MultiplatformTypes
 
-iOS & macOS Types with unified functions.
+UIKit & AppKit typealiases with unified functions.
 
-- `MPImage` is a typealias for `UIImage` & `NSImage`
-- `MPColor` is a typealias for `UIColor` & `NSColor`
+- `MPImage` = `UIImage` & `NSImage`
+- `MPColor` = `UIColor` & `NSColor`
+
+- `MPView` = `UIView` & `NSView`
+- `MPViewController` = `UIViewController` & `NSViewController`
+
+- `MPViewRepresentable` = `UIViewRepresentable` & `NSViewRepresentable`
+  - Use as protocol `ViewRepresentable`
+- `MPViewControllerRepresentable` = `UIViewControllerRepresentable` & `NSViewControllerRepresentable`
+  - Use as protocol `ViewControllerRepresentable`
+
+- `MPHostingView` = `UIHostingView` & `NSHostingView`
+- `MPHostingController` = `UIHostingController` & `NSHostingController`
+
+- `MPScrollView` = `UIScrollView` & `NSScrollView`
+
+- `MPBezierPath` = `UIBezierPath` & `NSBezierPath`
+
+- `MPVisualEffectView` = `UIVisualEffectView` & `NSVisualEffectView`
+  - Use in SwiftUI as `BlurView()` or `.backgroundBlur(cornerRadius:)`
