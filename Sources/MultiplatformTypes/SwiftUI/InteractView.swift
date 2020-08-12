@@ -1,5 +1,16 @@
 import SwiftUI
 
+public extension View {
+    func onInteract(on interacted: Binding<Bool>) -> some View {
+        ZStack {
+            self
+            InteractView { on in
+                interacted.wrappedValue = on
+            }
+        }
+    }
+}
+
 @available(*, deprecated, renamed: "InteractView")
 typealias TouchView = InteractView
 
