@@ -13,7 +13,7 @@ public extension View {
     /// use `.desktopBackgroundBlur()` to get a native **macOS** desktop blur
     func backgroundBlur(cornerRadius: CGFloat = 0.0, fallbackColor: Color = .clear) -> some View {
         #if os(macOS)
-        return background(fallbackColor)
+        return background(fallbackColor.mask(RoundedRectangle(cornerRadius: cornerRadius)))
         #else
         return background(VisualEffectView().mask(RoundedRectangle(cornerRadius: cornerRadius)))
         #endif
