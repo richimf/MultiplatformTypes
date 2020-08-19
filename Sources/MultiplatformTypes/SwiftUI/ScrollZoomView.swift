@@ -6,6 +6,8 @@ public typealias MPScrollView = NSScrollView
 public typealias MPScrollView = UIScrollView
 #endif
 
+@available(tvOS 14.0, *)
+@available(OSX 11.0, *)
 @available(iOS 14.0, *)
 public struct ScrollZoomViewLibraryContent: LibraryContentProvider {
     @LibraryContentBuilder
@@ -41,18 +43,24 @@ public struct ScrollZoomView<Content: View>: ViewRepresentable {
         let scrollView = MPScrollView()
         
         #if !os(macOS)
+        
         scrollView.showsHorizontalScrollIndicator = showsIndicators
         scrollView.showsVerticalScrollIndicator = showsIndicators
-        #endif
         
         scrollView.alwaysBounceHorizontal = true
         scrollView.alwaysBounceVertical = true
         
         scrollView.delegate = context.coordinator
         
+        #endif
+        
         let zoomView: MPView = MPHostingView(rootView: content())
-        context.coordinator.zoomView = zoomView
         scrollView.addSubview(zoomView)
+        
+        #if !os(macOS)
+        context.coordinator.zoomView = zoomView
+        #endif
+        
         zoomView.translatesAutoresizingMaskIntoConstraints = false
         zoomView.leftAnchor.constraint(equalTo: scrollView.leftAnchor).isActive = true
         zoomView.rightAnchor.constraint(equalTo: scrollView.rightAnchor).isActive = true
@@ -71,6 +79,8 @@ public struct ScrollZoomView<Content: View>: ViewRepresentable {
 
     }
     
+    #if !os(macOS)
+    
     public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
@@ -84,5 +94,7 @@ public struct ScrollZoomView<Content: View>: ViewRepresentable {
         }
         
     }
+    
+    #endif
     
 }

@@ -1,6 +1,6 @@
 # MultiplatformTypes
 
-UIKit & AppKit typealiases with unified functions.
+UIKit and AppKit typealiases with unified functions for iOS, tvOS and macOS.
 
 - `MPImage` = `UIImage` & `NSImage`
 - `MPColor` = `UIColor` & `NSColor`
