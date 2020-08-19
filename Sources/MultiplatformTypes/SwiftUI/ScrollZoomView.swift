@@ -22,17 +22,17 @@ public struct ScrollZoomViewLibraryContent: LibraryContentProvider {
 public struct ScrollZoomView<Content: View>: ViewRepresentable {
     
     let showsIndicators: Bool
-    let minimumZoomScale: CGFloat
-    let maximumZoomScale: CGFloat
+    @Binding var minimumZoomScale: CGFloat
+    @Binding var maximumZoomScale: CGFloat
     let content: () -> Content
     
     public init(showsIndicators: Bool = true,
-                minimumZoomScale: CGFloat = 0.5,
-                maximumZoomScale: CGFloat = 2.0,
+                minimumZoomScale: Binding<CGFloat> = .constant(0.5),
+                maximumZoomScale: Binding<CGFloat> = .constant(2.0),
                 content: @escaping () -> Content) {
         self.showsIndicators = showsIndicators
-        self.minimumZoomScale = minimumZoomScale
-        self.maximumZoomScale = maximumZoomScale
+        _minimumZoomScale = minimumZoomScale
+        _maximumZoomScale = maximumZoomScale
         self.content = content
     }
     
@@ -50,11 +50,6 @@ public struct ScrollZoomView<Content: View>: ViewRepresentable {
         
         scrollView.delegate = context.coordinator
         
-        #if !os(macOS)
-        scrollView.minimumZoomScale = minimumZoomScale
-        scrollView.maximumZoomScale = maximumZoomScale
-        #endif
-
         let zoomView: MPView = MPHostingView(rootView: content())
         context.coordinator.zoomView = zoomView
         scrollView.addSubview(zoomView)
@@ -67,7 +62,14 @@ public struct ScrollZoomView<Content: View>: ViewRepresentable {
         return scrollView
     }
     
-    public func updateView(_ view: MPScrollView, context: Context) {}
+    public func updateView(_ scrollView: MPScrollView, context: Context) {
+        
+        #if !os(macOS)
+        scrollView.minimumZoomScale = minimumZoomScale
+        scrollView.maximumZoomScale = maximumZoomScale
+        #endif
+
+    }
     
     public func makeCoordinator() -> Coordinator {
         Coordinator()
