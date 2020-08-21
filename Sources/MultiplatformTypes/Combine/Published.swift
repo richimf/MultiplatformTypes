@@ -8,7 +8,7 @@ class PublishedStorage {
 public extension Published {
     
     init(wrappedValue: Value, key: String) {
-        var value: Value = UserDefaults.standard.object(forKey: key) as? Value ?? wrappedValue
+        let value: Value = UserDefaults.standard.object(forKey: key) as? Value ?? wrappedValue
         self.init(wrappedValue: value)
         self.projectedValue.sink { value in
             UserDefaults.standard.set(value, forKey: key)
