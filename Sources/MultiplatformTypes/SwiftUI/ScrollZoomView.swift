@@ -42,20 +42,23 @@ public struct ScrollZoomView<Content: View>: ViewRepresentable {
         
         let scrollView = MPScrollView()
         
-        #if !os(macOS)
-        
+        #if os(macOS)
+        scrollView.allowsMagnification = true
+        scrollView.hasHorizontalScroller = showsIndicators
+        scrollView.hasVerticalScroller = showsIndicators
+        #else
         scrollView.showsHorizontalScrollIndicator = showsIndicators
         scrollView.showsVerticalScrollIndicator = showsIndicators
-        
         scrollView.alwaysBounceHorizontal = true
         scrollView.alwaysBounceVertical = true
-        
         scrollView.delegate = context.coordinator
-        
         #endif
         
         let zoomView: MPView = MPHostingView(rootView: content())
         scrollView.addSubview(zoomView)
+//        #if os(macOS)
+//        scrollView.contentView.addSubview(zoomView)
+//        #endif
         
         #if !os(macOS)
         context.coordinator.zoomView = zoomView
@@ -72,7 +75,10 @@ public struct ScrollZoomView<Content: View>: ViewRepresentable {
     
     public func updateView(_ scrollView: MPScrollView, context: Context) {
         
-        #if !os(macOS)
+        #if os(macOS)
+        scrollView.maxMagnification = maximumZoomScale
+        scrollView.minMagnification = minimumZoomScale
+        #else
         scrollView.minimumZoomScale = minimumZoomScale
         scrollView.maximumZoomScale = maximumZoomScale
         #endif
