@@ -186,18 +186,38 @@ public extension CGSize {
         CGSize(width: lhs.width + rhs.x,
                height: lhs.height + rhs.y)
     }
+    static func + (lhs: CGPoint, rhs: CGSize) -> CGSize {
+        CGSize(width: lhs.x + rhs.width,
+               height: lhs.y + rhs.height)
+    }
+    
     static func - (lhs: CGSize, rhs: CGPoint) -> CGSize {
         CGSize(width: lhs.width - rhs.x,
                height: lhs.height - rhs.y)
     }
+    static func - (lhs: CGPoint, rhs: CGSize) -> CGSize {
+        CGSize(width: lhs.x - rhs.width,
+               height: lhs.y - rhs.height)
+    }
+    
     static func * (lhs: CGSize, rhs: CGPoint) -> CGSize {
         CGSize(width: lhs.width * rhs.x,
                height: lhs.height * rhs.y)
     }
+    static func * (lhs: CGPoint, rhs: CGSize) -> CGSize {
+        CGSize(width: lhs.x * rhs.width,
+               height: lhs.y * rhs.height)
+    }
+    
     static func / (lhs: CGSize, rhs: CGPoint) -> CGSize {
         CGSize(width: lhs.width / rhs.x,
                height: lhs.height / rhs.y)
     }
+    static func / (lhs: CGPoint, rhs: CGSize) -> CGSize {
+        CGSize(width: lhs.x / rhs.width,
+               height: lhs.y / rhs.height)
+    }
+    
     
 }
 

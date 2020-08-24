@@ -185,18 +185,38 @@ public extension CGPoint {
         CGPoint(x: lhs.x + rhs.width,
                 y: lhs.y + rhs.height)
     }
+    static func + (lhs: CGSize, rhs: CGPoint) -> CGPoint {
+        CGPoint(x: lhs.width + rhs.x,
+                y: lhs.height + rhs.y)
+    }
+    
     static func - (lhs: CGPoint, rhs: CGSize) -> CGPoint {
         CGPoint(x: lhs.x - rhs.width,
                 y: lhs.y - rhs.height)
     }
+    static func - (lhs: CGSize, rhs: CGPoint) -> CGPoint {
+        CGPoint(x: lhs.width - rhs.x,
+                y: lhs.height - rhs.y)
+    }
+    
     static func * (lhs: CGPoint, rhs: CGSize) -> CGPoint {
         CGPoint(x: lhs.x * rhs.width,
                 y: lhs.y * rhs.height)
     }
+    static func * (lhs: CGSize, rhs: CGPoint) -> CGPoint {
+        CGPoint(x: lhs.width * rhs.x,
+                y: lhs.height * rhs.y)
+    }
+    
     static func / (lhs: CGPoint, rhs: CGSize) -> CGPoint {
         CGPoint(x: lhs.x / rhs.width,
                 y: lhs.y / rhs.height)
     }
+    static func / (lhs: CGSize, rhs: CGPoint) -> CGPoint {
+        CGPoint(x: lhs.width / rhs.x,
+                y: lhs.height / rhs.y)
+    }
+    
     
 }
 
