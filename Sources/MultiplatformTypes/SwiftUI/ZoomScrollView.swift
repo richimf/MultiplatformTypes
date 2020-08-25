@@ -282,8 +282,6 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
     #if os(macOS)
     public class Coordinator: MultiCoordinator {
         
-        var isUpdating: Bool = false
-        
         var didChange: (() -> ())?
         
         @objc func changed() {
