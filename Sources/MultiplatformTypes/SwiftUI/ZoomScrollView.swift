@@ -139,33 +139,32 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
                                                object: scrollView.contentView)
         context.coordinator.didChange = {
             guard !context.coordinator.isUpdating else { return }
-            print("ZoomScroll )))", "  zoom:", scrollView.magnification, "  offset:", getContentOffset(in: scrollView))
-            // FIXME: Don't modify during view update
+//            print("ZoomScroll )))", "  zoom:", scrollView.magnification, "  offset:", getContentOffset(in: scrollView))
             if bindContentOffset {
                 self.contentOffset = getContentOffset(in: scrollView)
-                if self.contentOffset != getContentOffset(in: scrollView) {
-                    print("ZoomScroll )))", "  offset ?????")
+//                if self.contentOffset != getContentOffset(in: scrollView) {
+//                    print("ZoomScroll )))", "  offset ?????")
 //                    fatalError("not in sync")
-                }
+//                }
             }
             if bindZoomScale {
                 self.zoomScale = scrollView.magnification
-                if self.zoomScale != scrollView.magnification {
-                    print("ZoomScroll )))", "  zoom ?????")
+//                if self.zoomScale != scrollView.magnification {
+//                    print("ZoomScroll )))", "  zoom ?????")
 //                    fatalError("not in sync")
-                }
+//                }
             }
         }
         #else
         context.coordinator.zoomView = zoomView
         context.coordinator.didScroll = {
-            // FIXME: Don't modify during view update
+            guard !context.coordinator.isUpdating else { return }
             if bindContentOffset {
                 self.contentOffset = scrollView.contentOffset
             }
         }
         context.coordinator.didZoom = {
-            // FIXME: Don't modify during view update
+            guard !context.coordinator.isUpdating else { return }
             if bindZoomScale {
                 self.zoomScale = scrollView.zoomScale
             }
@@ -188,7 +187,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         context.coordinator.isUpdating = true
         defer { context.coordinator.isUpdating = false }
         
-        print("ZoomScroll -->", "  zoom by:", zoomScale - scrollView.magnification, "to:", zoomScale, "  offset by:", contentOffset - getContentOffset(in: scrollView), "to:", contentOffset)
+//        print("ZoomScroll -->", "  zoom by:", zoomScale - scrollView.magnification, "to:", zoomScale, "  offset by:", contentOffset - getContentOffset(in: scrollView), "to:", contentOffset)
         
         let animation: Animation? = context.transaction.animation
         let animate: Bool = animation != nil
@@ -249,7 +248,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         
         #endif
 
-        print("ZoomScroll <--", "  zoom by:", zoomScale - scrollView.magnification, "to:", zoomScale, "  offset by:", contentOffset - getContentOffset(in: scrollView), "to:", contentOffset)
+//        print("ZoomScroll <--", "  zoom by:", zoomScale - scrollView.magnification, "to:", zoomScale, "  offset by:", contentOffset - getContentOffset(in: scrollView), "to:", contentOffset)
         
     }
     
@@ -277,8 +276,11 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         Coordinator()
     }
     
+    public class MultiCoordinator: NSObject {
+        var isUpdating: Bool = false
+    }
     #if os(macOS)
-    public class Coordinator {
+    public class Coordinator: MultiCoordinator {
         
         var isUpdating: Bool = false
         
@@ -290,7 +292,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         
     }
     #else
-    public class Coordinator: NSObject, UIScrollViewDelegate {
+    public class Coordinator: MultiCoordinator, UIScrollViewDelegate {
         
         var zoomView: UIView?
         
