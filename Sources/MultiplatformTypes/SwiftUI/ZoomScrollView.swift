@@ -25,15 +25,21 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
     
     let zoomAmplitude: CGFloat = 0.005
     
+    var bindZoomScale: Bool
+    @Binding var zoomScale: CGFloat
+    
     let showsIndicators: Bool
     @Binding var minimumZoomScale: CGFloat
     @Binding var maximumZoomScale: CGFloat
     let content: () -> Content
     
-    public init(showsIndicators: Bool = true,
+    public init(zoomScale: Binding<CGFloat>? = nil,
+                showsIndicators: Bool = true,
                 minimumZoomScale: Binding<CGFloat> = .constant(0.25),
                 maximumZoomScale: Binding<CGFloat> = .constant(4.0),
                 content: @escaping () -> Content) {
+        bindZoomScale = zoomScale != nil
+        _zoomScale = zoomScale ?? .constant(1.0)
         self.showsIndicators = showsIndicators
         _minimumZoomScale = minimumZoomScale
         _maximumZoomScale = maximumZoomScale
@@ -103,8 +109,24 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         fill(zoomView, in: scrollView)
         #endif
         
-        #if !os(macOS)
+        #if os(macOS)
+        NotificationCenter.default.addObserver(context.coordinator,
+                                               selector: #selector(context.coordinator.changed),
+                                               name: NSView.boundsDidChangeNotification,
+                                               object: scrollView.contentView)
+        context.coordinator.didChange = {
+            if bindZoomScale, zoomScale != scrollView.magnification {
+                zoomScale = scrollView.magnification
+            }
+        }
+        #else
         context.coordinator.zoomView = zoomView
+        context.coordinator.didScroll = {}
+        context.coordinator.didZoom = {
+            if bindZoomScale, zoomScale != scrollView.zoomScale {
+                zoomScale = scrollView.zoomScale
+            }
+        }
         #endif
         
         return scrollView
@@ -142,32 +164,75 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
     
     public func updateView(_ scrollView: MPScrollView, context: Context) {
         
+        let animation: Animation? = context.transaction.animation
+                
         #if os(macOS)
+        
         scrollView.minMagnification = minimumZoomScale
         scrollView.maxMagnification = maximumZoomScale
+        
+        if bindZoomScale, scrollView.magnification != zoomScale {
+            if animation != nil {
+                scrollView.animator().magnification = zoomScale
+            } else {
+                scrollView.magnification = zoomScale
+            }
+        }
+        
         #else
+        
         scrollView.minimumZoomScale = minimumZoomScale
         scrollView.maximumZoomScale = maximumZoomScale
+        
+        if bindZoomScale, scrollView.zoomScale != zoomScale {
+            if animation != nil {
+                UIView.animate(withDuration: 0.5) {
+                    scrollView.zoomScale = zoomScale
+                }
+            } else {
+                scrollView.zoomScale = zoomScale
+            }
+        }
+        
         #endif
 
     }
-    
-    #if !os(macOS)
     
     public func makeCoordinator() -> Coordinator {
         Coordinator()
     }
     
+    #if os(macOS)
+    public class Coordinator {
+        
+        var didChange: (() -> ())?
+        
+        @objc func changed() {
+            didChange?()
+        }
+        
+    }
+    #else
     public class Coordinator: NSObject, UIScrollViewDelegate {
         
         var zoomView: UIView?
         
+        var didScroll: (() -> ())?
+        var didZoom: (() -> ())?
+
         public func viewForZooming(in scrollView: UIScrollView) -> UIView? {
             zoomView
         }
         
+        public func scrollViewDidScroll(_ scrollView: UIScrollView) {
+            didScroll?()
+        }
+        
+        public func scrollViewDidZoom(_ scrollView: UIScrollView) {
+            didZoom?()
+        }
+        
     }
-    
     #endif
     
 }
