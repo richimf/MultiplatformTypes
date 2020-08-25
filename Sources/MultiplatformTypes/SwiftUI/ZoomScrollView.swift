@@ -23,10 +23,14 @@ public struct ZoomScrollViewLibraryContent: LibraryContentProvider {
 
 public struct ZoomScrollView<Content: View>: ViewRepresentable {
     
-    let zoomAmplitude: CGFloat = 0.005
+    #if os(macOS)
+    let zoomByScrollAmplitude: CGFloat = 0.005
+    #endif
     
     var bindZoomScale: Bool
     @Binding var zoomScale: CGFloat
+    var bindContentOffset: Bool
+    @Binding var contentOffset: CGPoint
     
     let showsIndicators: Bool
     @Binding var minimumZoomScale: CGFloat
@@ -34,12 +38,15 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
     let content: () -> Content
     
     public init(zoomScale: Binding<CGFloat>? = nil,
+                contentOffset: Binding<CGPoint>? = nil,
                 showsIndicators: Bool = true,
                 minimumZoomScale: Binding<CGFloat> = .constant(0.25),
                 maximumZoomScale: Binding<CGFloat> = .constant(4.0),
                 content: @escaping () -> Content) {
         bindZoomScale = zoomScale != nil
         _zoomScale = zoomScale ?? .constant(1.0)
+        bindContentOffset = contentOffset != nil
+        _contentOffset = contentOffset ?? .constant(.zero)
         self.showsIndicators = showsIndicators
         _minimumZoomScale = minimumZoomScale
         _maximumZoomScale = maximumZoomScale
@@ -84,14 +91,15 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         var isPressingOption: Bool = false { didSet { pressed() } }
         
         scrollView.scrollCallback = { scroll in
-            let magScale: CGFloat = 1.0 + scroll.y * zoomAmplitude
+            let magnificationScale: CGFloat = 1.0 + scroll.y * zoomByScrollAmplitude
+            let magnification: CGFloat = scrollView.magnification * magnificationScale
             if isPressingOption {
                 guard let mouseLocation: CGPoint = middleView.mouseLocation else { return }
-                zoom(by: magScale, to: mouseLocation, in: scrollView)
+                scrollView.setMagnification(magnification, centeredAt: mouseLocation)
             } else if isPressingShift {
                 let scrollFrame: CGRect = scrollView.documentVisibleRect
                 let centerLocation: CGPoint = scrollFrame.origin + scrollFrame.size / 2
-                zoom(by: magScale, to: centerLocation, in: scrollView)
+                scrollView.setMagnification(magnification, centeredAt: centerLocation)
             }
         }
         
@@ -130,18 +138,26 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
                                                name: NSView.boundsDidChangeNotification,
                                                object: scrollView.contentView)
         context.coordinator.didChange = {
-            if bindZoomScale, zoomScale != scrollView.magnification {
-                // FIXME: Don't modify during view update
-                zoomScale = scrollView.magnification
+            // FIXME: Don't modify during view update
+            if bindContentOffset {
+                self.contentOffset = scrollView.documentVisibleRect.origin
+            }
+            if bindZoomScale {
+                self.zoomScale = scrollView.magnification
             }
         }
         #else
         context.coordinator.zoomView = zoomView
-        context.coordinator.didScroll = {}
+        context.coordinator.didScroll = {
+            // FIXME: Don't modify during view update
+            if bindContentOffset {
+                self.contentOffset = scrollView.contentOffset
+            }
+        }
         context.coordinator.didZoom = {
-            if bindZoomScale, zoomScale != scrollView.zoomScale {
-                // FIXME: Don't modify during view update
-                zoomScale = scrollView.zoomScale
+            // FIXME: Don't modify during view update
+            if bindZoomScale {
+                self.zoomScale = scrollView.zoomScale
             }
         }
         #endif
@@ -156,28 +172,6 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         childView.topAnchor.constraint(equalTo: parentView.topAnchor).isActive = true
         childView.bottomAnchor.constraint(equalTo: parentView.bottomAnchor).isActive = true
     }
-    
-    #if os(macOS)
-    func zoom(by magScale: CGFloat,
-              to focusPoint: CGPoint,
-              in scrollView: MPScrollView) {
-        
-//        let magFrame: CGRect = scrollView.documentVisibleRect
-//        let magOrigin: CGPoint = magFrame.origin
-//        let magSize: CGSize = magFrame.size
-//        let focusOffset: CGPoint = focusPoint - magOrigin
-//        let focusOffsetUV: CGPoint = focusOffset / magSize
-//        let newMagSize: CGSize = magSize * magScale
-//        let magSizeDiff: CGSize = newMagSize - magSize
-//        let newMouseOffset: CGPoint = newMagSize * focusOffsetUV
-//        let newMagOrigin: CGPoint = magOrigin + magSizeDiff * focusOffsetUV
-//        let newMagFrame: CGRect = CGRect(origin: newMagOrigin, size: newMagSize)
-//        scrollView/*.animator()*/.magnify(toFit: newMagFrame)
-        
-        scrollView.setMagnification(scrollView.magnification * magScale, centeredAt: focusPoint)
-        
-    }
-    #endif
     
     public func updateView(_ scrollView: MPScrollView, context: Context) {
         
@@ -196,6 +190,14 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
             }
         }
         
+        if bindContentOffset, scrollView.documentVisibleRect.origin != contentOffset {
+            if animation != nil {
+                scrollView.animator().magnify(toFit: CGRect(origin: contentOffset, size: scrollView.documentVisibleRect.size))
+            } else {
+                scrollView.magnify(toFit: CGRect(origin: contentOffset, size: scrollView.documentVisibleRect.size))
+            }
+        }
+        
         #else
         
         scrollView.minimumZoomScale = minimumZoomScale
@@ -208,6 +210,16 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
                 }
             } else {
                 scrollView.zoomScale = zoomScale
+            }
+        }
+        
+        if bindContentOffset, scrollView.contentOffset != contentOffset {
+            if animation != nil {
+                UIView.animate(withDuration: 0.5) {
+                    scrollView.contentOffset = contentOffset
+                }
+            } else {
+                scrollView.contentOffset = contentOffset
             }
         }
         
