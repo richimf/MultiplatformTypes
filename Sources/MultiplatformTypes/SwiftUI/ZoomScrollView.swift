@@ -53,29 +53,53 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         let contentView: MPView = MPHostingView(rootView: content())
         
         #if os(macOS)
+        scrollView.allowsMagnification = true
+        scrollView.hasHorizontalScroller = showsIndicators
+        scrollView.hasVerticalScroller = showsIndicators
+        scrollView.usesPredominantAxisScrolling = false
+        #else
+        scrollView.showsHorizontalScrollIndicator = showsIndicators
+        scrollView.showsVerticalScrollIndicator = showsIndicators
+        scrollView.alwaysBounceHorizontal = true
+        scrollView.alwaysBounceVertical = true
+        scrollView.delegate = context.coordinator
+        #endif
+        
+        // Zoom on macOS
+        
+        #if os(macOS)
         
         let middleView = NSMiddleView()
         
-        var isPressingShift: Bool = false {
-            didSet {
-                scrollView.canScroll = !isPressingShift
-                #if DEBUG
-                if middleView.mouseLocation != nil || !isPressingShift {
-                    middleView.backgroundColor = isPressingShift ? NSColor(white: 0.5, alpha: 0.05) : .clear
-                }
-                #endif
+        func pressed() {
+            let canZoom: Bool = isPressingOption || isPressingShift
+            scrollView.canScroll = !canZoom
+            #if DEBUG
+            if middleView.mouseLocation != nil || !canZoom {
+                middleView.backgroundColor = canZoom ? NSColor(white: 0.5, alpha: 0.05) : .clear
             }
+            #endif
         }
+        var isPressingShift: Bool = false { didSet { pressed() } }
+        var isPressingOption: Bool = false { didSet { pressed() } }
         
         scrollView.scrollCallback = { scroll in
-            guard isPressingShift else { return }
-            guard let mouseLocation: CGPoint = middleView.mouseLocation else { return }
             let magScale: CGFloat = 1.0 + scroll.y * zoomAmplitude
-            zoom(by: magScale, to: mouseLocation, in: scrollView)
+            if isPressingOption {
+                guard let mouseLocation: CGPoint = middleView.mouseLocation else { return }
+                zoom(by: magScale, to: mouseLocation, in: scrollView)
+            } else if isPressingShift {
+                let scrollFrame: CGRect = scrollView.documentVisibleRect
+                let centerLocation: CGPoint = scrollFrame.origin + scrollFrame.size / 2
+                zoom(by: magScale, to: centerLocation, in: scrollView)
+            }
         }
         
         middleView.shiftPressCallback = { shift in
             isPressingShift = shift
+        }
+        middleView.optionPressCallback = { option in
+            isPressingOption = option
         }
         middleView.addSubview(contentView)
         fill(contentView, in: middleView)
@@ -85,18 +109,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         let zoomView: MPView = contentView
         #endif
         
-        #if os(macOS)
-        scrollView.allowsMagnification = true
-        scrollView.rulersVisible = true
-        scrollView.hasHorizontalScroller = showsIndicators
-        scrollView.hasVerticalScroller = showsIndicators
-        #else
-        scrollView.showsHorizontalScrollIndicator = showsIndicators
-        scrollView.showsVerticalScrollIndicator = showsIndicators
-        scrollView.alwaysBounceHorizontal = true
-        scrollView.alwaysBounceVertical = true
-        scrollView.delegate = context.coordinator
-        #endif
+        // Zoom View
         
         #if os(macOS)
         scrollView.documentView = zoomView
@@ -109,6 +122,8 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         fill(zoomView, in: scrollView)
         #endif
         
+        // Zoom Callbacks
+        
         #if os(macOS)
         NotificationCenter.default.addObserver(context.coordinator,
                                                selector: #selector(context.coordinator.changed),
@@ -116,6 +131,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
                                                object: scrollView.contentView)
         context.coordinator.didChange = {
             if bindZoomScale, zoomScale != scrollView.magnification {
+                // FIXME: Don't modify during view update
                 zoomScale = scrollView.magnification
             }
         }
@@ -124,6 +140,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         context.coordinator.didScroll = {}
         context.coordinator.didZoom = {
             if bindZoomScale, zoomScale != scrollView.zoomScale {
+                // FIXME: Don't modify during view update
                 zoomScale = scrollView.zoomScale
             }
         }
@@ -261,14 +278,6 @@ public class NSMiddleView: NSView {
     
     public override var acceptsFirstResponder: Bool { true }
     
-    var isPressingShift: Bool = false {
-        didSet {
-            guard oldValue != isPressingShift else { return }
-            shiftPressCallback?(isPressingShift)
-        }
-    }
-    var shiftPressCallback: ((Bool) -> ())?
-    
     var mouseLocation: CGPoint? {
         let mouseInScreen: CGPoint = NSEvent.mouseLocation
         let mouseInWindow: CGPoint = mouseInScreen - (window?.frame.origin ?? .zero)
@@ -278,8 +287,25 @@ public class NSMiddleView: NSView {
         return mouseInView
     }
     
+    var isPressingShift: Bool = false {
+        didSet {
+            guard oldValue != isPressingShift else { return }
+            shiftPressCallback?(isPressingShift)
+        }
+    }
+    var shiftPressCallback: ((Bool) -> ())?
+    
+    var isPressingOption: Bool = false {
+        didSet {
+            guard oldValue != isPressingOption else { return }
+            optionPressCallback?(isPressingOption)
+        }
+    }
+    var optionPressCallback: ((Bool) -> ())?
+    
     public override func flagsChanged(with event: NSEvent) {
         isPressingShift = event.modifierFlags.contains(.shift)
+        isPressingOption = event.modifierFlags.contains(.option)
     }
     
 }
