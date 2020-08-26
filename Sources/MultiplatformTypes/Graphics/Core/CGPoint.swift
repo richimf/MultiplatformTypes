@@ -217,6 +217,60 @@ public extension CGPoint {
                 y: lhs.height / rhs.y)
     }
     
+}
+
+public extension CGPoint {
+    
+    static func += (lhs: inout CGPoint, rhs: CGSize) {
+        lhs = lhs + rhs
+    }
+    static func += (lhs: inout CGPoint, rhs: CGPoint) {
+        lhs = lhs + rhs
+    }
+    static func += (lhs: inout CGPoint, rhs: CGFloat) {
+        lhs = lhs + rhs
+    }
+    
+    static func -= (lhs: inout CGPoint, rhs: CGSize) {
+        lhs = lhs - rhs
+    }
+    static func -= (lhs: inout CGPoint, rhs: CGPoint) {
+        lhs = lhs - rhs
+    }
+    static func -= (lhs: inout CGPoint, rhs: CGFloat) {
+        lhs = lhs - rhs
+    }
+    
+    static func *= (lhs: inout CGPoint, rhs: CGSize) {
+        lhs = lhs * rhs
+    }
+    static func *= (lhs: inout CGPoint, rhs: CGPoint) {
+        lhs = lhs * rhs
+    }
+    static func *= (lhs: inout CGPoint, rhs: CGFloat) {
+        lhs = lhs * rhs
+    }
+    
+    static func /= (lhs: inout CGPoint, rhs: CGSize) {
+        lhs = lhs / rhs
+    }
+    static func /= (lhs: inout CGPoint, rhs: CGPoint) {
+        lhs = lhs / rhs
+    }
+    static func /= (lhs: inout CGPoint, rhs: CGFloat) {
+        lhs = lhs / rhs
+    }
     
 }
+
+public extension CGPoint {
+    
+    static prefix func - (size: CGPoint) -> CGPoint {
+        CGPoint(x: -size.x, y: -size.y)
+    }
+    
+}
+
+
+
 
