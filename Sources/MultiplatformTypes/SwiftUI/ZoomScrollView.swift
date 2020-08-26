@@ -251,7 +251,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
         let center: CGPoint = origin + size / 2
         return vFlip ? CGPoint(x: center.x, y: contentSize.height - center.y) : center
         #else
-        return scrollView.contentOffset + scrollView.contentSize / 2
+        return scrollView.contentOffset + scrollView.visibleSize / 2
         #endif
     }
     
@@ -268,7 +268,7 @@ public struct ZoomScrollView<Content: View>: ViewRepresentable {
             scrollView.magnify(toFit: frame)
         }
         #else
-        let contentOffset: CGPoint = contentCenter - scrollView.contentSize / 2
+        let contentOffset: CGPoint = contentCenter - scrollView.visibleSize / 2
         if animated {
             UIView.animate(withDuration: 0.5) {
                 scrollView.contentOffset = contentOffset
