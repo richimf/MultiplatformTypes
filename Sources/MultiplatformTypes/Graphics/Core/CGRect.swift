@@ -19,3 +19,15 @@ public extension CGRect {
     }
     
 }
+
+public extension CGRect {
+    
+    static func + (lhs: CGRect, rhs: CGPoint) -> CGRect {
+        CGRect(origin: lhs.origin + rhs, size: lhs.size)
+    }
+    
+    static func + (lhs: CGRect, rhs: CGSize) -> CGRect {
+        CGRect(origin: lhs.origin, size: lhs.size + rhs)
+    }
+    
+}
