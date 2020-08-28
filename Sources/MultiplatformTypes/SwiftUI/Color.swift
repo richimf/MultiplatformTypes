@@ -13,3 +13,13 @@ public extension Color {
         #endif
     }
 }
+
+public extension Color {
+    static var background: some View {
+        #if os(macOS)
+        return Color(.windowBackgroundColor)
+        #else
+        return Color.primary.colorInvert()
+        #endif
+    }
+}
